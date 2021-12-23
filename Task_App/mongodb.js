@@ -29,7 +29,7 @@ MongoClient.connect(connectionURL, {
     age: 14,
   }], (error, result) => {
     if (error){
-      return log.error("Unable to add user");
+      return console.log("Unable to add user");
     }
     console.log(result)
   })
