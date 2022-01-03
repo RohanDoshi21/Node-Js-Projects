@@ -3,7 +3,7 @@ const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken")
 
-mongoose.connect('mongodb://127.0.0.1:/task-app-api')
+// mongoose.connect('mongodb://127.0.0.1:/task-app-api')
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -42,6 +42,12 @@ const userSchema = new mongoose.Schema({
             required: true
         }
     }]
+})
+
+userSchema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'owner'
 })
 
 userSchema.methods.generateAuthToken = async function (){
