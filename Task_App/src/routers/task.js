@@ -21,12 +21,30 @@ router.get('/tasks', auth, async (req, res) => {
     try {
         // const tasks = await Task.find({})
         // res.send(tasks)
-        await req.user.populate('tasks').execPopulate()
+        // console.log(req.user)
+
+
+        // await req.user.populate('tasks').execPopulate()
+
+        //for new version of mongoose .execPopulate is not required
+
+        await req.user.populate('tasks')
+        console.log(req.user)
+
         res.send(req.user.tasks)
     } catch (e) {
         res.status(500).send()
     }
 })
+
+// router.get('/tasks', auth, async (req, res) => {
+//     try {
+//         await req.user.populate('tasks').execPopulate()
+//         res.send(req.user.tasks)
+//     } catch (e) {
+//         res.status(500).send()
+//     }
+// })
 
 // router.get('/tasks/:id', async (req, res) => {
 //     const _id = req.params.id
