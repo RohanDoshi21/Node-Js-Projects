@@ -16,13 +16,13 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true,
         lowercase: true,
-        validate(value){
-            if (!validator.isEmail(value)){
+        validate(value) {
+            if (!validator.isEmail(value)) {
                 throw new Error('Email is invalid')
             }
         }
     },
-    password:{
+    password: {
         type: String,
         required: true,
         minLength: 7,
@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
     age: {
         type: Number,
         default: 0,
-        validate(value){
+        validate(value) {
             if (value < 0) {
                 throw new Error('Age cannot be negative')
             }
@@ -43,6 +43,8 @@ const userSchema = new mongoose.Schema({
             required: true
         }
     }]
+}, {
+    timestamps: true
 })
 
 userSchema.virtual('tasks', {
@@ -51,7 +53,7 @@ userSchema.virtual('tasks', {
     foreignField: 'owner'
 })
 
-userSchema.methods.generateAuthToken = async function (){
+userSchema.methods.generateAuthToken = async function () {
     const user = this
     const token = jwt.sign({_id: user.id.toString()}, 'rohandoshi21')
 
@@ -84,13 +86,13 @@ userSchema.methods.toJSON = function () {
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({email})
 
-    if (!user){
+    if (!user) {
         throw new Error('Unable to login')
     }
 
     const isMatched = await bcrypt.compare(password, user.password)
 
-    if (!isMatched){
+    if (!isMatched) {
         throw new Error('Unable to login')
     }
 
@@ -98,15 +100,15 @@ userSchema.statics.findByCredentials = async (email, password) => {
 }
 
 // Hash the plain text password before saving/updating
-userSchema.pre('save', async function (next){
+userSchema.pre('save', async function (next) {
     const user = this
-    if (user.isModified('password')){
+    if (user.isModified('password')) {
         user.password = await bcrypt.hash(user.password, 8)
     }
     next()
 })
 
-userSchema.pre('remove', async function (next){
+userSchema.pre('remove', async function (next) {
     const user = this
     await Task.deleteMany({owner: user._id})
     next()

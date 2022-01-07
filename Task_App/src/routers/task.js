@@ -17,7 +17,14 @@ router.post('/tasks', auth, async (req, res) => {
     }
 })
 
+// GET /tasks?completed=true
 router.get('/tasks', auth, async (req, res) => {
+    const match = {}
+
+    if (req.query.completed) {
+        match.completed = req.query.completed === 'true'
+    }
+
     try {
         // const tasks = await Task.find({})
         // res.send(tasks)
@@ -28,8 +35,14 @@ router.get('/tasks', auth, async (req, res) => {
 
         //for new version of mongoose .execPopulate is not required
 
-        await req.user.populate('tasks')
-        console.log(req.user)
+        await req.user.populate({
+            path: 'tasks',
+            match
+            // match: {
+            //     completed: false
+            // }
+        })
+        //console.log(req.user)
 
         res.send(req.user.tasks)
     } catch (e) {
@@ -66,7 +79,7 @@ router.get('/tasks/:id', auth, async (req, res) => {
     const _id = req.params.id
 
     try {
-        const task = await Task.findOne({ _id, owner: req.user._id })
+        const task = await Task.findOne({_id, owner: req.user._id})
 
         if (!task) {
             return res.status(404).send()
@@ -111,11 +124,11 @@ router.patch('/tasks/:id', auth, async (req, res) => {
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
-        return res.status(400).send({ error: 'Invalid updates!' })
+        return res.status(400).send({error: 'Invalid updates!'})
     }
 
     try {
-        const task = await Task.findOne({ _id: req.params.id, owner: req.user._id})
+        const task = await Task.findOne({_id: req.params.id, owner: req.user._id})
 
         if (!task) {
             return res.status(404).send()
@@ -146,7 +159,7 @@ router.patch('/tasks/:id', auth, async (req, res) => {
 
 router.delete('/tasks/:id', auth, async (req, res) => {
     try {
-        const task = await Task.findOneAndDelete({ _id: req.params.id, owner: req.user._id })
+        const task = await Task.findOneAndDelete({_id: req.params.id, owner: req.user._id})
 
         if (!task) {
             res.status(404).send()
