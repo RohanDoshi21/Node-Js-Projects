@@ -1,7 +1,9 @@
 const express = require('express')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
+const multer = require('multer')
 const router = new express.Router()
+const sharp = require('sharp')
 
 router.post('/users', async (req, res) => {
     const user = new User(req.body)
@@ -144,6 +146,50 @@ router.delete('/users/me', auth, async (req, res) => {
     } catch (e) {
         res.status(500).send()
     }
+})
+
+const upload = multer({
+    // to save in user profile we will not save in destination avatars here
+    // dest: 'avatars',
+    limits: {
+        fileSize: 1000000
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(jpg|png|jpeg)$/)) {
+            return cb(new Error('Please upload an image only'))
+        }
+        cb(undefined, true)
+    }
+})
+
+router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
+    const buffer = await sharp(req.file.buffer).resize({width: 250, height: 250}).png().toBuffer()
+    req.user.avatar = buffer
+    await req.user.save()
+    res.send()
+}, (error, req, res, next) => {
+    res.status(200).send({error: error.message})
+})
+
+router.get('/users/:id/avatar', async (req, res) => {
+    try {
+        console.log("Test")
+        const user = await User.findById(req.params.id)
+
+        if (!user || !user.avatar) {
+            throw new Error()
+        }
+        res.set('Content-Type', 'image/png')
+        res.send(user.avatar)
+    } catch (e) {
+        res.status(404).send()
+    }
+})
+
+router.delete('/users/me/avatar', auth, async (req, res) => {
+    req.user.avatar = undefined
+    await req.user.save()
+    res.send()
 })
 
 module.exports = router
