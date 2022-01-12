@@ -44,7 +44,7 @@ router.get('/tasks', auth, async (req, res) => {
 
         //for new version of mongoose .execPopulate is not required
 
-        await req.user.populate({
+        await req.user.populate([{
             path: 'tasks',
             match,
             options: {
@@ -55,12 +55,12 @@ router.get('/tasks', auth, async (req, res) => {
             // match: {
             //     completed: false
             // }
-        })
-        //console.log(req.user)
+        }])
+        console.log(req.user['tasks'])
 
         res.send(req.user.tasks)
     } catch (e) {
-        res.status(500).send()
+        res.status(500).send(e)
     }
 })
 
