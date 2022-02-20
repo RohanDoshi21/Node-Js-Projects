@@ -20,11 +20,20 @@ io.on('connection', (socket) => {
     socket.emit('countUpdated', count)
 
     socket.emit('message', "Welcome")
+    socket.broadcast.emit('message', "A new user has joined!")
 
     socket.on('increment', () => {
         count++;
         // socket.emit('countUpdated', count)  //this line will emit only to one connection
         io.emit('countUpdated', count) // this will emit to all the connected clients
+    })
+
+    socket.on('sendMessage', (message) => {
+        io.emit('message', message)
+    })
+
+    socket.on('disconnect', () => {
+        io.emit('message', "A user has left")
     })
 })
 
